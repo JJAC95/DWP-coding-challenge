@@ -8,10 +8,10 @@ import TicketTypeRequest from "../../src/pairtest/lib/TicketTypeRequest";
 import InvalidPurchaseException from "../../src/pairtest/lib/InvalidPurchaseException";
 
 test("it should error when more than 20 tickets of a certain type are purchased", () => {
-  const ticketReq = [new TicketTypeRequest("ADULT", 21)];
+  const ticketReq = new TicketTypeRequest("ADULT", 21);
   let response;
   try {
-    response = validateTicketAmount(ticketReq);
+    response = validateTicketAmount([ticketReq]);
   } catch (error) {
     response = error;
   }
@@ -23,14 +23,16 @@ test("it should error when more than 20 tickets of a certain type are purchased"
 });
 
 test("it should error when more than 20 tickets of combined types are purchased", () => {
-  const ticketReq = [
-    new TicketTypeRequest("ADULT", 15),
-    new TicketTypeRequest("CHILD", 4),
-    new TicketTypeRequest("INFANT", 5),
-  ];
+  const adultTicketReq = new TicketTypeRequest("ADULT", 2);
+  const childTicketReq = new TicketTypeRequest("CHILD", 14);
+  const infantTicketReq = new TicketTypeRequest("INFANT", 5);
   let response;
   try {
-    response = validateTicketAmount(ticketReq);
+    response = validateTicketAmount([
+      adultTicketReq,
+      childTicketReq,
+      infantTicketReq,
+    ]);
   } catch (error) {
     response = error;
   }
@@ -64,13 +66,12 @@ test("it should error when an invalid AccountId type is provided", () => {
 });
 
 test("it should error when there are no adults present", () => {
-  const ticketReq = [
-    new TicketTypeRequest("CHILD", 4),
-    new TicketTypeRequest("INFANT", 5),
-  ];
+  const ticketReq = new TicketTypeRequest("CHILD", 4);
+  const ticketReq2 = new TicketTypeRequest("INFANT", 5);
+
   let response;
   try {
-    response = validateAdultPresent(ticketReq);
+    response = validateAdultPresent([ticketReq, ticketReq2]);
   } catch (error) {
     response = error;
   }
@@ -82,18 +83,23 @@ test("it should error when there are no adults present", () => {
 });
 
 test("it should error when there are more infants than adults", () => {
-  const ticketReq = [
-    new TicketTypeRequest("ADULT", 2),
-    new TicketTypeRequest("CHILD", 4),
-    new TicketTypeRequest("INFANT", 5),
-  ];
+  const adultTicketReq = new TicketTypeRequest("ADULT", 2);
+  const childTicketReq = new TicketTypeRequest("CHILD", 4);
+  const infantTicketReq = new TicketTypeRequest("INFANT", 5);
+
   let response;
   try {
-    response = validateInfantToAdultRatio(ticketReq);
+    response = validateInfantToAdultRatio([
+      adultTicketReq,
+      childTicketReq,
+      infantTicketReq,
+    ]);
   } catch (error) {
     response = error;
   }
   expect(response).toEqual(
-    new InvalidPurchaseException("Invalid AccountID type")
+    new InvalidPurchaseException(
+      "An infant is required to sit on an adults lap, therefore there must be one adult per infant"
+    )
   );
 });

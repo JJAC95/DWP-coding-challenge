@@ -11,6 +11,7 @@ function validateAccountId(accountId) {
 function validateTicketAmount(ticketTypeRequests) {
   let totalTickets = 0;
   for (let ticketTypeRequest of ticketTypeRequests) {
+    console.log("Ticket amount", ticketTypeRequests, ticketTypeRequest);
     totalTickets += ticketTypeRequest.getNoOfTickets();
   }
 
@@ -22,6 +23,7 @@ function validateTicketAmount(ticketTypeRequests) {
 }
 
 function validateAdultPresent(ticketTypeRequests) {
+  console.log("TTR", ticketTypeRequests);
   if (
     !ticketTypeRequests.some((request) => request.getTicketType() === "ADULT")
   ) {
@@ -32,17 +34,22 @@ function validateAdultPresent(ticketTypeRequests) {
 }
 
 function validateInfantToAdultRatio(ticketTypeRequests) {
-  let adultCount = ticketTypeRequests
-    .find((request) => {
-      request.getTicketType() === "ADULT";
-    })
-    .getNoOfTickets();
-  let infantCount = ticketTypeRequests
-    .find((request) => {
-      request.getTicketType() === "INFANT";
-    })
-    .getNoOfTickets();
-  console.log(infantCount, adultCount);
+  let adultCount = 0;
+  let infantCount = 0;
+
+  let adultRequests = ticketTypeRequests.find(
+    (request) => request.getTicketType() === "ADULT"
+  );
+  if (adultRequests) {
+    adultCount = adultRequests.getNoOfTickets();
+  }
+
+  let infantRequests = ticketTypeRequests.find(
+    (request) => request.getTicketType() === "INFANT"
+  );
+  if (infantRequests) {
+    infantCount = infantRequests.getNoOfTickets();
+  }
   if (infantCount > adultCount) {
     throw new InvalidPurchaseException(
       "An infant is required to sit on an adults lap, therefore there must be one adult per infant"

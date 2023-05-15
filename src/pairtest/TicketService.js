@@ -32,11 +32,12 @@ export default class TicketService {
   #validateRequest(accountId, ticketTypeRequests) {
     validateAccountId(accountId);
     validateAdultPresent(ticketTypeRequests);
-    // validateInfantToAdultRatio(ticketTypeRequests);
+    validateInfantToAdultRatio(ticketTypeRequests);
     validateTicketAmount(ticketTypeRequests);
   }
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
+    console.log("PURCHASE", ticketTypeRequests);
     this.#validateRequest(accountId, ticketTypeRequests);
     for (let ticketRequest of ticketTypeRequests) {
       this.#totalToPay += this.#calculatePrice(ticketRequest);
