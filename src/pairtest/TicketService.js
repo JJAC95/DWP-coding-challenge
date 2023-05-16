@@ -1,34 +1,20 @@
-import TicketTypeRequest from "./lib/TicketTypeRequest.js";
-import InvalidPurchaseException from "./lib/InvalidPurchaseException.js";
 import {
   validateAccountId,
   validateAdultPresent,
   validateInfantToAdultRatio,
   validateTicketAmount,
 } from "./validation/TicketServiceValidation.js";
+import calculatePrice from "./actions/calculatePrice.js";
+import calculateTotalSeats from "./actions/calculateTotalSeats.js";
+import TicketPaymentService from "../thirdparty/paymentgateway/TicketPaymentService.js";
+import SeatReservationService from "../thirdparty/seatbooking/SeatReservationService.js";
 export default class TicketService {
   /**
    * Should only have private methods other than the one below.
    */
   #totalToPay = 0;
-  #adultPresent = false;
-  #adultRequired = false;
-  #calculatePrice(ticketRequest) {
-    let price = 0;
-    let type = ticketRequest.getTicketType();
-    switch (type) {
-      case "ADULT":
-        price = 20 * ticketRequest.getNoOfTickets();
-        break;
-      case "CHILD":
-        price = 10 * ticketRequest.getNoOfTickets();
-        break;
-      default:
-        price = 0;
-    }
-    return price;
-  }
-  #calculateTotalSeats(ticketTypeRequests) {}
+  #totalSeats = 0;
+
   #validateRequest(accountId, ticketTypeRequests) {
     validateAccountId(accountId);
     validateAdultPresent(ticketTypeRequests);
@@ -37,12 +23,14 @@ export default class TicketService {
   }
 
   purchaseTickets(accountId, ...ticketTypeRequests) {
-    console.log("PURCHASE", ticketTypeRequests);
     this.#validateRequest(accountId, ticketTypeRequests);
     for (let ticketRequest of ticketTypeRequests) {
-      this.#totalToPay += this.#calculatePrice(ticketRequest);
+      this.#totalToPay += calculatePrice(ticketRequest);
+      this.#totalSeats += calculateTotalSeats(ticketRequest);
     }
-
-    return this.#totalToPay;
+    const ticketPaymentService = new TicketPaymentService();
+    const seatReservationService = new SeatReservationService();
+    ticketPaymentService.makePayment(accountId, this.#totalToPay);
+    seatReservationService.reserveSeat(accountId, this.#totalSeats);
   }
 }

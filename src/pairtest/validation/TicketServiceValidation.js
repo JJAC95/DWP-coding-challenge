@@ -11,7 +11,6 @@ function validateAccountId(accountId) {
 function validateTicketAmount(ticketTypeRequests) {
   let totalTickets = 0;
   for (let ticketTypeRequest of ticketTypeRequests) {
-    console.log("Ticket amount", ticketTypeRequests, ticketTypeRequest);
     totalTickets += ticketTypeRequest.getNoOfTickets();
   }
 
@@ -23,7 +22,6 @@ function validateTicketAmount(ticketTypeRequests) {
 }
 
 function validateAdultPresent(ticketTypeRequests) {
-  console.log("TTR", ticketTypeRequests);
   if (
     !ticketTypeRequests.some((request) => request.getTicketType() === "ADULT")
   ) {
@@ -40,13 +38,12 @@ function validateInfantToAdultRatio(ticketTypeRequests) {
   let adultRequests = ticketTypeRequests.find(
     (request) => request.getTicketType() === "ADULT"
   );
-  if (adultRequests) {
-    adultCount = adultRequests.getNoOfTickets();
-  }
-
   let infantRequests = ticketTypeRequests.find(
     (request) => request.getTicketType() === "INFANT"
   );
+  if (adultRequests) {
+    adultCount = adultRequests.getNoOfTickets();
+  }
   if (infantRequests) {
     infantCount = infantRequests.getNoOfTickets();
   }
